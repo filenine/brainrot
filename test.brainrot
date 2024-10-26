@@ -1,0 +1,6 @@
+skibidi main {
+    rizz i;
+    flex (i = 0; i < 10; i = i + 1) {
+        bussin "Hello, World!";
+    }
+}
