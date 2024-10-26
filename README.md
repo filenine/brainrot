@@ -45,8 +45,8 @@ brew install gcc flex bison
 1. Clone this repository:
 
 ```bash
-git clone https://github.com/yourusername/brainrot-language.git
-cd brainrot-language
+git clone https://github.com/yourusername/brainrot.git
+cd brainrot
 ```
 
 2. Generate the parser and lexer:
