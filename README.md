@@ -45,7 +45,7 @@ brew install gcc flex bison
 1. Clone this repository:
 
 ```bash
-git clone https://github.com/yourusername/brainrot.git
+git clone https://github.com/araujo88/brainrot.git
 cd brainrot
 ```
 
