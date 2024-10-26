@@ -42,11 +42,14 @@ typedef enum
     NODE_PRINT_STATEMENT,
     NODE_STATEMENT_LIST,
     NODE_IF_STATEMENT,
-    NODE_STRING_LITERAL
+    NODE_STRING_LITERAL,
+    NODE_SWITCH_STATEMENT,
+    NODE_CASE,
+    NODE_DEFAULT_CASE,
+    NODE_BREAK_STATEMENT,
 } NodeType;
 
 /* Structures */
-
 typedef struct StatementList
 {
     ASTNode *statement;
@@ -59,6 +62,19 @@ typedef struct
     ASTNode *then_branch;
     ASTNode *else_branch;
 } IfStatementNode;
+
+typedef struct CaseNode
+{
+    ASTNode *value;
+    ASTNode *statements;
+    struct CaseNode *next;
+} CaseNode;
+
+typedef struct
+{
+    ASTNode *expression; // The switch expression
+    CaseNode *cases;     // Linked list of cases
+} SwitchNode;
 
 /* AST node structure */
 struct ASTNode
@@ -88,6 +104,9 @@ struct ASTNode
         } for_stmt;
         StatementList *statements; // For statement lists
         IfStatementNode if_stmt;   // For if statements
+        SwitchNode switch_stmt;
+        CaseNode case_node;
+        ASTNode *break_stmt; // For break statements, can be NULL
         // Add other nodes as needed
     } data;
 };
@@ -103,6 +122,12 @@ ASTNode *create_print_statement_node(ASTNode *expr);
 ASTNode *create_statement_list(ASTNode *statement, ASTNode *next_statement);
 ASTNode *create_if_statement_node(ASTNode *condition, ASTNode *then_branch, ASTNode *else_branch);
 ASTNode *create_string_literal_node(char *string);
+ASTNode *create_switch_statement_node(ASTNode *expression, CaseNode *cases);
+CaseNode *create_case_node(ASTNode *value, ASTNode *statements);
+CaseNode *create_default_case_node(ASTNode *statements);
+CaseNode *append_case_list(CaseNode *list, CaseNode *case_node);
+ASTNode *create_break_node();
+
 int evaluate_expression(ASTNode *node);
 void execute_statement(ASTNode *node);
 void execute_statements(ASTNode *node);

@@ -58,10 +58,11 @@ ASTNode *root = NULL;
     int ival;
     char *sval;
     ASTNode *node;
+    CaseNode *case_node;
 }
 
 /* Define token types */
-%token SKIBIDI BUSSIN FLEX PLUS MINUS TIMES DIVIDE MOD SEMICOLON COMMA
+%token SKIBIDI BUSSIN FLEX PLUS MINUS TIMES DIVIDE MOD SEMICOLON COLON COMMA
 %token LPAREN RPAREN LBRACE RBRACE
 %token LT GT LE GE EQ NE EQUALS AND OR
 %token BREAK CASE CHAR CONST CONTINUE DEFAULT DO DOUBLE ELSE ENUM
@@ -81,6 +82,8 @@ ASTNode *root = NULL;
 %type <node> return_statement
 %type <node> init_expr condition increment
 %type <node> if_statement
+%type <node> switch_statement break_statement
+%type <case_node> case_list case_clause
 
 %start program
 
@@ -127,7 +130,35 @@ statement:
         { $$ = $1; }
     | if_statement
         { $$ = $1; }
+    | switch_statement
+        { $$ = $1; }
+    | break_statement SEMICOLON
+        { $$ = $1; }
     ;
+
+switch_statement:
+    SWITCH LPAREN expression RPAREN LBRACE case_list RBRACE
+        { $$ = create_switch_statement_node($3, $6); }
+    ;
+
+case_list:
+      /* empty */
+        { $$ = NULL; }
+    | case_list case_clause
+        { $$ = append_case_list($1, $2); }
+    ;
+
+case_clause:
+    CASE expression COLON statements
+        { $$ = create_case_node($2, $4); }
+    | DEFAULT COLON statements
+        { $$ = create_default_case_node($3); }
+    ;
+
+break_statement:
+    BREAK
+        { $$ = create_break_node(); }
+    ;  
 
 if_statement:
       IF LPAREN expression RPAREN LBRACE statements RBRACE %prec LOWER_THAN_ELSE
@@ -142,6 +173,10 @@ declaration:
     IDENTIFIER IDENTIFIER
         {
             $$ = create_assignment_node($2, create_number_node(0));
+        }
+    | IDENTIFIER IDENTIFIER EQUALS expression
+        {
+            $$ = create_assignment_node($2, $4);
         }
     ;
 

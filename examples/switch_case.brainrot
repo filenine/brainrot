@@ -1,0 +1,18 @@
+skibidi main {
+    rizz choice = 2;
+    ohio (choice) {
+        sigma 1:
+            yapping("You chose 1, that's pretty sus!");
+            bruh;
+        sigma 2:
+            yapping("You chose 2, gigachad move!");
+            bruh;
+        sigma 3:
+            yapping("You chose 3, totally based!");
+            bruh;
+        based:
+            yapping("You chose something unexpected, cringe!");
+            bruh;
+    }
+    bussin 0;
+}

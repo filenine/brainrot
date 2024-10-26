@@ -34,6 +34,7 @@ extern int yylineno;
 "}"              { return RBRACE; }
 ";"              { return SEMICOLON; }
 ","              { return COMMA; }
+":"              { return COLON; }
 
 "skibidi"        { return SKIBIDI; }
 "bussin"         { return BUSSIN; }

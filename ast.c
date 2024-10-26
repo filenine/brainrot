@@ -2,6 +2,46 @@
 
 #include "ast.h"
 #include <stdbool.h>
+#include <setjmp.h>
+
+static jmp_buf break_env;
+
+void execute_switch_statement(ASTNode *node)
+{
+    int switch_value = evaluate_expression(node->data.switch_stmt.expression);
+    CaseNode *current_case = node->data.switch_stmt.cases;
+    int matched = 0;
+
+    if (setjmp(break_env) == 0)
+    {
+        while (current_case)
+        {
+            if (current_case->value)
+            {
+                int case_value = evaluate_expression(current_case->value);
+                if (case_value == switch_value || matched)
+                {
+                    matched = 1;
+                    execute_statements(current_case->statements);
+                }
+            }
+            else
+            {
+                // Default case
+                if (matched || !matched)
+                {
+                    execute_statements(current_case->statements);
+                    break;
+                }
+            }
+            current_case = current_case->next;
+        }
+    }
+    else
+    {
+        // Break encountered; do nothing
+    }
+}
 
 /* Include the symbol table functions */
 extern bool set_variable(char *name, int value);
@@ -215,6 +255,13 @@ void execute_statement(ASTNode *node)
             execute_statement(node->data.if_stmt.else_branch);
         }
         break;
+    case NODE_SWITCH_STATEMENT:
+        execute_switch_statement(node);
+        break;
+    case NODE_BREAK_STATEMENT:
+        // Signal to break out of the current loop/switch
+        longjmp(break_env, 1);
+        break;
     default:
         yyerror("Unknown statement type");
         break;
@@ -273,5 +320,47 @@ ASTNode *create_string_literal_node(char *string)
     ASTNode *node = malloc(sizeof(ASTNode));
     node->type = NODE_STRING_LITERAL;
     node->data.name = string;
+    return node;
+}
+
+ASTNode *create_switch_statement_node(ASTNode *expression, CaseNode *cases)
+{
+    ASTNode *node = malloc(sizeof(ASTNode));
+    node->type = NODE_SWITCH_STATEMENT;
+    node->data.switch_stmt.expression = expression;
+    node->data.switch_stmt.cases = cases;
+    return node;
+}
+
+CaseNode *create_case_node(ASTNode *value, ASTNode *statements)
+{
+    CaseNode *node = malloc(sizeof(CaseNode));
+    node->value = value;
+    node->statements = statements;
+    node->next = NULL;
+    return node;
+}
+
+CaseNode *create_default_case_node(ASTNode *statements)
+{
+    return create_case_node(NULL, statements); // NULL value indicates default case
+}
+
+CaseNode *append_case_list(CaseNode *list, CaseNode *case_node)
+{
+    if (!list)
+        return case_node;
+    CaseNode *current = list;
+    while (current->next)
+        current = current->next;
+    current->next = case_node;
+    return list;
+}
+
+ASTNode *create_break_node()
+{
+    ASTNode *node = malloc(sizeof(ASTNode));
+    node->type = NODE_BREAK_STATEMENT;
+    node->data.break_stmt = NULL;
     return node;
 }
