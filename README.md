@@ -87,6 +87,8 @@ skibidi main {
 | -------- | ------------ |
 | skibidi  | void         |
 | rizz     | int          |
+| cap      | bool         |
+| cooked   | auto         |
 | flex     | for          |
 | bussin   | return       |
 | edging   | if           |
