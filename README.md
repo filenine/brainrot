@@ -121,6 +121,7 @@ skibidi main {
 ### Builtin functions
 
 - `yapping(string)`: equivalent to `printf`
+- `baka(string)`: equivalent to `fprintf(stderr...)`
 
 ### Operators
 

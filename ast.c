@@ -48,6 +48,7 @@ extern bool set_variable(char *name, int value);
 extern int get_variable(char *name);
 extern void yyerror(const char *s);
 extern void yapping(const char *format, ...);
+extern void baka(const char *format, ...);
 
 /* Function implementations */
 
@@ -111,6 +112,14 @@ ASTNode *create_print_statement_node(ASTNode *expr)
 {
     ASTNode *node = malloc(sizeof(ASTNode));
     node->type = NODE_PRINT_STATEMENT;
+    node->data.op.left = expr;
+    return node;
+}
+
+ASTNode *create_error_statement_node(ASTNode *expr)
+{
+    ASTNode *node = malloc(sizeof(ASTNode));
+    node->type = NODE_ERROR_STATEMENT;
     node->data.op.left = expr;
     return node;
 }
@@ -239,6 +248,20 @@ void execute_statement(ASTNode *node)
         {
             int value = evaluate_expression(expr);
             yapping("%d\n", value);
+        }
+        break;
+    }
+    case NODE_ERROR_STATEMENT:
+    {
+        ASTNode *expr = node->data.op.left;
+        if (expr->type == NODE_STRING_LITERAL)
+        {
+            baka("%s\n", expr->data.name);
+        }
+        else
+        {
+            int value = evaluate_expression(expr);
+            baka("%d\n", value);
         }
         break;
     }

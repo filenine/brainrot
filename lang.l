@@ -44,6 +44,7 @@ extern int yylineno;
 "schizo"         { return VOLATILE; }
 "goon"           { return WHILE; }
 "yapping"        { return YAPPING; }
+"baka"           { return BAKA; }
 
 "=="             { return EQ; }
 "!="             { return NE; }
