@@ -9,6 +9,7 @@
 int yylex(void);
 void yyerror(const char *s);
 void yapping(const char* format, ...);
+void baka(const char* format, ...);
 
 /* Symbol table to hold variable values */
 typedef struct {
@@ -62,7 +63,7 @@ ASTNode *root = NULL;
 }
 
 /* Define token types */
-%token SKIBIDI RIZZ YAPPING MAIN BUSSIN FLEX 
+%token SKIBIDI RIZZ YAPPING BAKA MAIN BUSSIN FLEX 
 %token PLUS MINUS TIMES DIVIDE MOD SEMICOLON COLON COMMA
 %token LPAREN RPAREN LBRACE RBRACE
 %token LT GT LE GE EQ NE EQUALS AND OR
@@ -80,6 +81,7 @@ ASTNode *root = NULL;
 %type <node> expression
 %type <node> for_statement
 %type <node> print_statement
+%type <node> error_statement
 %type <node> return_statement
 %type <node> init_expr condition increment
 %type <node> if_statement
@@ -126,6 +128,8 @@ statement:
     | for_statement
         { $$ = $1; }
     | print_statement SEMICOLON
+        { $$ = $1; }
+    | error_statement SEMICOLON
         { $$ = $1; }
     | return_statement SEMICOLON
         { $$ = $1; }
@@ -218,6 +222,11 @@ print_statement:
         { $$ = create_print_statement_node($3); }
     ;
 
+error_statement:
+    BAKA LPAREN expression RPAREN
+        { $$ = create_error_statement_node($3); }
+    ;
+
 return_statement:
     BUSSIN expression
         { $$ = $2; }
@@ -281,5 +290,12 @@ void yapping(const char* format, ...) {
     va_list args;
     va_start(args, format);
     vprintf(format, args);
+    va_end(args);
+}
+
+void baka(const char* format, ...) {
+    va_list args;
+    va_start(args, format);
+    vfprintf(stderr, format, args);
     va_end(args);
 }
