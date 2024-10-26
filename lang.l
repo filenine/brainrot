@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "ast.h"
 #include "lang.tab.h"
 
 extern int yylineno;
@@ -11,7 +12,34 @@ extern int yylineno;
 
 %%
 
-"skibidi"        { return VOID; }
+"=="             { return EQ; }
+"!="             { return NE; }
+"<="             { return LE; }
+">="             { return GE; }
+"&&"             { return AND; }
+"||"             { return OR; }
+"<"              { return LT; }
+">"              { return GT; }
+"="              { return EQUALS; }
+
+"+"              { return PLUS; }
+"-"              { return MINUS; }
+"*"              { return TIMES; }
+"/"              { return DIVIDE; }
+"%"              { return MOD; }
+
+"("              { return LPAREN; }
+")"              { return RPAREN; }
+"{"              { return LBRACE; }
+"}"              { return RBRACE; }
+";"              { return SEMICOLON; }
+","              { return COMMA; }
+
+"skibidi"        { return SKIBIDI; }
+"bussin"         { return BUSSIN; }
+"flex"           { return FLEX; }
+"rizz"           { yylval.sval = strdup(yytext); return IDENTIFIER; }
+"main"           { yylval.sval = strdup(yytext); return IDENTIFIER; }
 "bruh"           { return BREAK; }
 "sigma"          { return CASE; }
 "yap"            { return CHAR; }
@@ -20,17 +48,14 @@ extern int yylineno;
 "based"          { return DEFAULT; }
 "mewing"         { return DO; }
 "gigachad"       { return DOUBLE; }
-"amogus"         { return ELSE; }
 "gyatt"          { return ENUM; }
 "whopper"        { return EXTERN; }
 "chad"           { return FLOAT; }
-"flex"           { return FOR; }
 "cringe"         { return GOTO; }
 "edging"         { return IF; }
-"rizz"           { return INT; }
+"amogus"         { return ELSE; }
 "giga"           { return LONG; }
 "edgy"           { return REGISTER; }
-"bussin"         { return RETURN; }
 "soy"            { return SHORT; }
 "nut"            { return SIGNED; }
 "maxxing"        { return SIZEOF; }
@@ -41,32 +66,17 @@ extern int yylineno;
 "nonut"          { return UNSIGNED; }
 "volatile"       { return VOLATILE; }
 "goon"           { return WHILE; }
-"main"           { return IDENTIFIER; }
-
-"+"              { return PLUS; }
-"-"              { return MINUS; }
-"*"              { return TIMES; }
-"/"              { return DIVIDE; }
-";"              { return SEMICOLON; }
-","              { return COMMA; }
-"="              { return EQUALS; }
-"("              { return LPAREN; }
-")"              { return RPAREN; }
-"{"              { return LBRACE; }
-"}"              { return RBRACE; }
-"<"              { return LT; }
-">"              { return GT; }
-"&&"             { return AND; }
-"||"             { return OR; }
+"yapping"        { yylval.sval = strdup(yytext); return IDENTIFIER; }
 
 [0-9]+           { yylval.ival = atoi(yytext); return NUMBER; }
 [a-zA-Z_][a-zA-Z0-9_]* { yylval.sval = strdup(yytext); return IDENTIFIER; }
 \"([^\\\"]|\\.)*\" {
-    yylval.sval = strdup(yytext); 
+    yylval.sval = strdup(yytext + 1);
+    yylval.sval[strlen(yylval.sval) - 1] = '\0';
     return STRING_LITERAL;
 }
 [ \t\n]+         ; /* Ignore whitespace */
-.                { return *yytext; }
+.                { /* Ignore unrecognized characters */ }
 
 %%
 

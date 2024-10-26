@@ -59,26 +59,24 @@ flex -o lang.lex.c lang.l
 3. Compile the compiler:
 
 ```bash
-gcc lang.lex.c lang.tab.c -o lang_parser -lfl
+make
 ```
 
 ## 💻 Usage
 
-1. Create a Brainrot source file (e.g., `test.brainrot`):
+1. Create a Brainrot source file (e.g., `hello.brainrot`):
 
 ```c
 skibidi main {
-    rizz i;
-    flex (i = 0; i < 10; i = i + 1) {
-        bussin "Hello, World!";
-    }
+    yapping("Hello, World!");
+    bussin 0;
 }
 ```
 
 2. Run your Brainrot program:
 
 ```bash
-./lang_parser < test.brainrot
+./brainrot < hello.brainrot
 ```
 
 ## 📚 Language Reference
@@ -116,6 +114,11 @@ skibidi main {
 | ohio     | switch       |
 | chungus  | union        |
 | nonut    | unsigned     |
+| schizo   | volatile     |
+
+### Builtin functions
+
+- `yapping(string)`: equivalent to `printf`
 
 ### Operators
 

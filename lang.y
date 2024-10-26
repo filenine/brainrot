@@ -1,117 +1,241 @@
 %{
+#include "ast.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdarg.h>
+#include <stdbool.h>
 
 int yylex(void);
 void yyerror(const char *s);
+void yapping(const char* format, ...);
 
-/* Define global variables if needed */
-char *string_value;
-extern int yylineno; 
+/* Symbol table to hold variable values */
+typedef struct {
+    char *name;
+    int value;
+} variable;
+
+#define MAX_VARS 100
+variable symbol_table[MAX_VARS];
+int var_count = 0;
+
+/* Function to add or update variables in the symbol table */
+bool set_variable(char *name, int value) {
+    for (int i = 0; i < var_count; i++) {
+        if (strcmp(symbol_table[i].name, name) == 0) {
+            symbol_table[i].value = value;
+            return true;
+        }
+    }
+    if (var_count < MAX_VARS) {
+        symbol_table[var_count].name = strdup(name);
+        symbol_table[var_count].value = value;
+        var_count++;
+        return true;
+    }
+    return false;
+}
+
+/* Function to retrieve variable values */
+int get_variable(char *name) {
+    for (int i = 0; i < var_count; i++) {
+        if (strcmp(symbol_table[i].name, name) == 0) {
+            return symbol_table[i].value;
+        }
+    }
+    yyerror("Undefined variable");
+    exit(1);
+}
+
+extern int yylineno;
+
+/* Root of the AST */
+ASTNode *root = NULL;
 %}
 
-/* Define the union for different value types */
 %union {
     int ival;
     char *sval;
+    ASTNode *node;
 }
 
 /* Define token types */
-%token PLUS MINUS TIMES DIVIDE SEMICOLON COMMA EQUALS
-%token LPAREN RPAREN LBRACE RBRACE LT GT AND OR
+%token SKIBIDI BUSSIN FLEX PLUS MINUS TIMES DIVIDE MOD SEMICOLON COMMA
+%token LPAREN RPAREN LBRACE RBRACE
+%token LT GT LE GE EQ NE EQUALS AND OR
 %token BREAK CASE CHAR CONST CONTINUE DEFAULT DO DOUBLE ELSE ENUM
 %token EXTERN FLOAT FOR GOTO IF INT LONG REGISTER SHORT SIGNED
 %token SIZEOF STATIC STRUCT SWITCH TYPEDEF UNION UNSIGNED VOID VOLATILE WHILE
 %token <sval> IDENTIFIER
 %token <ival> NUMBER
 %token <sval> STRING_LITERAL
-%token RETURN
 
-/* Define types for non-terminals if needed */
-%type <ival> expression
+/* Declare types for non-terminals */
+%type <node> program skibidi_function
+%type <node> statements statement
+%type <node> declaration
+%type <node> expression
+%type <node> for_statement
+%type <node> print_statement
+%type <node> return_statement
+%type <node> init_expr condition increment
+%type <node> if_statement
 
-/* Precedence rules */
+%start program
+
+/* Define precedence for operators */
 %nonassoc LOWER_THAN_ELSE
 %nonassoc ELSE
-%right EQUALS
-%left LT GT
-%left PLUS MINUS
-%left TIMES DIVIDE
-%right UMINUS
+
+%right EQUALS           /* Assignment operator */
+%left OR                /* Logical OR */
+%left AND               /* Logical AND */
+%nonassoc EQ NE         /* Equality operators */
+%nonassoc LT GT LE GE   /* Relational operators */
+%left PLUS MINUS        /* Addition and subtraction */
+%left TIMES DIVIDE MOD  /* Multiplication, division, modulo */
+%right UMINUS           /* Unary minus */
 
 %%
+
 program:
-    function
+    skibidi_function
+        { root = $1; }
     ;
 
-function:
-    VOID IDENTIFIER LBRACE statements RBRACE
+skibidi_function:
+    SKIBIDI IDENTIFIER LBRACE statements RBRACE
+        { $$ = $4; }
     ;
 
 statements:
-    /* empty */
+      /* empty */
+        { $$ = NULL; }
     | statements statement
+        { $$ = create_statement_list($2, $1); }
     ;
 
 statement:
-    declaration SEMICOLON
+      declaration SEMICOLON
+        { $$ = $1; }
     | for_statement
-    | return_statement SEMICOLON
-    | expression SEMICOLON
+        { $$ = $1; }
     | print_statement SEMICOLON
+        { $$ = $1; }
+    | return_statement SEMICOLON
+        { $$ = $1; }
+    | if_statement
+        { $$ = $1; }
+    ;
+
+if_statement:
+      IF LPAREN expression RPAREN LBRACE statements RBRACE %prec LOWER_THAN_ELSE
+        { $$ = create_if_statement_node($3, $6, NULL); }
+    | IF LPAREN expression RPAREN LBRACE statements RBRACE ELSE if_statement %prec ELSE
+        { $$ = create_if_statement_node($3, $6, $9); }
+    | IF LPAREN expression RPAREN LBRACE statements RBRACE ELSE LBRACE statements RBRACE %prec ELSE
+        { $$ = create_if_statement_node($3, $6, $10); }
     ;
 
 declaration:
-    INT IDENTIFIER
-    | INT IDENTIFIER EQUALS expression
+    IDENTIFIER IDENTIFIER
+        {
+            $$ = create_assignment_node($2, create_number_node(0));
+        }
     ;
 
 for_statement:
-    FOR LPAREN init_expr SEMICOLON condition SEMICOLON increment RPAREN LBRACE statements RBRACE
+    FLEX LPAREN init_expr SEMICOLON condition SEMICOLON increment RPAREN LBRACE statements RBRACE
+        {
+            $$ = create_for_statement_node($3, $5, $7, $10);
+        }
     ;
 
 init_expr:
-    declaration
+      declaration
+        { $$ = $1; }
     | expression
+        { $$ = $1; }
     ;
 
 condition:
     expression
+        { $$ = $1; }
     ;
 
 increment:
     expression
+        { $$ = $1; }
     ;
 
 print_statement:
-    RETURN STRING_LITERAL    { printf("%s\n", $2); free($2); }
+    IDENTIFIER LPAREN expression RPAREN
+        { $$ = create_print_statement_node($3); }
     ;
 
 return_statement:
-    RETURN expression    { printf("%d\n", $2); }
+    BUSSIN expression
+        { $$ = $2; }
     ;
 
 expression:
-    NUMBER                        { $$ = $1; }
-  | IDENTIFIER                    { $$ = 0; /* placeholder for variable lookup */ }
-  | expression PLUS expression    { $$ = $1 + $3; }
-  | expression MINUS expression   { $$ = $1 - $3; }
-  | expression TIMES expression   { $$ = $1 * $3; }
-  | expression DIVIDE expression  { $$ = $1 / $3; }
-  | expression LT expression      { $$ = $1 < $3; }
-  | MINUS expression %prec UMINUS { $$ = -$2; }
-  | LPAREN expression RPAREN      { $$ = $2; }
-  | IDENTIFIER EQUALS expression  { $$ = $3; /* Placeholder for assignment */ }
-  ;
+      NUMBER
+        { $$ = create_number_node($1); }
+    | IDENTIFIER
+        { $$ = create_identifier_node($1); }
+    | IDENTIFIER EQUALS expression
+        { $$ = create_assignment_node($1, $3); }
+    | expression PLUS expression
+        { $$ = create_operation_node(OP_PLUS, $1, $3); }
+    | expression MINUS expression
+        { $$ = create_operation_node(OP_MINUS, $1, $3); }
+    | expression TIMES expression
+        { $$ = create_operation_node(OP_TIMES, $1, $3); }
+    | expression DIVIDE expression
+        { $$ = create_operation_node(OP_DIVIDE, $1, $3); }
+    | expression MOD expression
+        { $$ = create_operation_node(OP_MOD, $1, $3); }
+    | expression LT expression
+        { $$ = create_operation_node(OP_LT, $1, $3); }
+    | expression GT expression
+        { $$ = create_operation_node(OP_GT, $1, $3); }
+    | expression LE expression
+        { $$ = create_operation_node(OP_LE, $1, $3); }
+    | expression GE expression
+        { $$ = create_operation_node(OP_GE, $1, $3); }
+    | expression EQ expression
+        { $$ = create_operation_node(OP_EQ, $1, $3); }
+    | expression NE expression
+        { $$ = create_operation_node(OP_NE, $1, $3); }
+    | expression AND expression
+        { $$ = create_operation_node(OP_AND, $1, $3); }
+    | expression OR expression
+        { $$ = create_operation_node(OP_OR, $1, $3); }
+    | MINUS expression %prec UMINUS
+        { $$ = create_unary_operation_node(OP_NEG, $2); }
+    | LPAREN expression RPAREN
+        { $$ = $2; }
+    | STRING_LITERAL
+        { $$ = create_string_literal_node($1); }
+    ;
 
 %%
 
 int main(void) {
-    return yyparse();
+    if (yyparse() == 0) {
+        execute_statement(root);
+    }
+    return 0;
 }
 
 void yyerror(const char *s) {
     fprintf(stderr, "Error: %s at line %d\n", s, yylineno);
 }
 
+void yapping(const char* format, ...) {
+    va_list args;
+    va_start(args, format);
+    vprintf(format, args);
+    va_end(args);
+}
