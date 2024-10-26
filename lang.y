@@ -62,7 +62,8 @@ ASTNode *root = NULL;
 }
 
 /* Define token types */
-%token SKIBIDI BUSSIN FLEX PLUS MINUS TIMES DIVIDE MOD SEMICOLON COLON COMMA
+%token SKIBIDI RIZZ YAPPING MAIN BUSSIN FLEX 
+%token PLUS MINUS TIMES DIVIDE MOD SEMICOLON COLON COMMA
 %token LPAREN RPAREN LBRACE RBRACE
 %token LT GT LE GE EQ NE EQUALS AND OR
 %token BREAK CASE CHAR CONST CONTINUE DEFAULT DO DOUBLE ELSE ENUM
@@ -108,7 +109,7 @@ program:
     ;
 
 skibidi_function:
-    SKIBIDI IDENTIFIER LBRACE statements RBRACE
+    SKIBIDI MAIN LBRACE statements RBRACE
         { $$ = $4; }
     ;
 
@@ -170,14 +171,22 @@ if_statement:
     ;
 
 declaration:
-    IDENTIFIER IDENTIFIER
-        {
-            $$ = create_assignment_node($2, create_number_node(0));
-        }
-    | IDENTIFIER IDENTIFIER EQUALS expression
-        {
-            $$ = create_assignment_node($2, $4);
-        }
+    optional_modifiers RIZZ IDENTIFIER
+        { $$ = create_assignment_node($3, create_number_node(0)); }
+    | optional_modifiers RIZZ IDENTIFIER EQUALS expression
+        { $$ = create_assignment_node($3, $5); }
+    ;
+
+optional_modifiers:
+      /* empty */
+        { /* No action needed */ }
+    | optional_modifiers modifier
+        { /* No action needed */ }
+    ;
+
+modifier:
+    VOLATILE
+        { /* No action needed */ }
     ;
 
 for_statement:
@@ -205,7 +214,7 @@ increment:
     ;
 
 print_statement:
-    IDENTIFIER LPAREN expression RPAREN
+    YAPPING LPAREN expression RPAREN
         { $$ = create_print_statement_node($3); }
     ;
 
