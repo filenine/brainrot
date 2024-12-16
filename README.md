@@ -146,6 +146,12 @@ Current limitations include:
 - No support for functions other than main
 - Basic error reporting
 
+## 🔌 VSCode Extension
+
+Brainrot has a Visual Studio Code extension to enhance your development experience with syntax highlighting and support for the Brainrot programming language. You can find it here:
+
+[Brainrot VSCode Extension](https://github.com/araujo88/brainrot-vscode-support)
+
 ## 🤝 Contributing
 
 Feel free to contribute to this project by:
