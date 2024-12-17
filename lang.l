@@ -18,7 +18,7 @@ extern int yylineno;
 "rizz"           { return RIZZ; }
 "main"           { return MAIN; }
 "bruh"           { return BREAK; }
-"sigma"          { return CASE; }
+"sigma rule"     { return CASE; }
 "yap"            { return CHAR; }
 "grimace"        { return CONST; }
 "grind"          { return CONTINUE; }
