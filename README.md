@@ -25,7 +25,7 @@ To build and run the Brainrot compiler, you'll need:
 
 ```bash
 sudo apt-get update
-sudo apt-get install gcc flex bison
+sudo apt-get install gcc flex bison libfl-dev
 ```
 
 #### Arch Linux
@@ -38,6 +38,27 @@ sudo pacman -S gcc flex bison
 
 ```bash
 brew install gcc flex bison
+```
+
+Some macOS users are experiencing an error related to `libfl`. First, check if `libfl` is installed at:
+
+```
+/opt/homebrew/lib/libfl.dylib  # For Apple Silicon
+/usr/local/lib/libfl.dylib  # For Intel Macs
+```
+
+And if not, you have to find it and symlink to it. Find it using:
+
+```
+find /opt/homebrew -name "libfl.*"  # For Apple Silicon
+find /usr/local -name "libfl.*"  # For Intel Macs
+```
+
+And link it with:
+
+```
+sudo ln -s /path/to/libfl.dylib /opt/homebrew/lib/libfl.dylib  # For Apple Silicon
+sudo ln -s /path/to/libfl.dylib /usr/local/lib/libfl.dylib  # For Intel Macs
 ```
 
 ## 🚀 Building the Compiler
