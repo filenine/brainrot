@@ -26,7 +26,7 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install gcc flex bison -y
+        sudo apt-get install gcc flex bison libfl-dev -y
 
     - name: Build Brainrot
       run: |
