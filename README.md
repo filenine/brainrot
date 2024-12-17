@@ -83,6 +83,12 @@ flex -o lang.lex.c lang.l
 3. Compile the compiler:
 
 ```bash
+gcc -o brainrot lang.tab.c lex.yy.c ast.c -lfl
+```
+
+Alternatively, simply run:
+
+```bash
 make
 ```
 
@@ -144,8 +150,8 @@ skibidi main {
 
 ### Builtin functions
 
-- `yapping(string)`: equivalent to `printf`
-- `baka(string)`: equivalent to `fprintf(stderr...)`
+- `yapping(string)`: equivalent to `puts(const char *str)`
+- `baka(string)`: equivalent to `fprintf(stderr, const char *format, ...)`
 
 ### Operators
 
