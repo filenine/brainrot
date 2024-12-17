@@ -31,8 +31,8 @@ jobs:
     - name: Build Brainrot
       run: |
         bison -d -Wcounterexamples lang.y -o lang.tab.c
-        flex -o lang.lex.c lang.l
-        gcc -o brainrot lang.tab.c lang.lex.c -lfl
+        flex lang.l
+        gcc -o brainrot lang.tab.c lex.yy.c ast.c -lfl
 
     - name: Run Brainrot examples
       run: |
