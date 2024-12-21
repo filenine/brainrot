@@ -63,7 +63,7 @@ ASTNode *root = NULL;
 }
 
 /* Define token types */
-%token SKIBIDI RIZZ YAPPING BAKA MAIN BUSSIN FLEX 
+%token SKIBIDI RIZZ YAPPING YAPPIN BAKA MAIN BUSSIN FLEX 
 %token PLUS MINUS TIMES DIVIDE MOD SEMICOLON COLON COMMA
 %token LPAREN RPAREN LBRACE RBRACE
 %token LT GT LE GE EQ NE EQUALS AND OR
@@ -218,8 +218,10 @@ increment:
     ;
 
 print_statement:
-    YAPPING LPAREN expression RPAREN
-        { $$ = create_print_statement_node($3); }
+      YAPPING LPAREN expression RPAREN
+        { $$ = create_print_statement_node($3, /*newline=*/true); }
+    | YAPPIN LPAREN expression RPAREN
+        { $$ = create_print_statement_node($3, /*newline=*/false); }
     ;
 
 error_statement:
@@ -287,6 +289,13 @@ void yyerror(const char *s) {
 }
 
 void yapping(const char* format, ...) {
+    va_list args;
+    va_start(args, format);
+    vprintf(format, args);
+    va_end(args);
+}
+
+void yappin(const char* format, ...) {
     va_list args;
     va_start(args, format);
     vprintf(format, args);

@@ -103,6 +103,11 @@ struct ASTNode
             ASTNode *incr;
             ASTNode *body;
         } for_stmt;
+        struct
+        { // For print statements
+            ASTNode *expr;
+            bool newline;
+        } print_stmt;
         StatementList *statements; // For statement lists
         IfStatementNode if_stmt;   // For if statements
         SwitchNode switch_stmt;
@@ -119,7 +124,7 @@ ASTNode *create_assignment_node(char *name, ASTNode *expr);
 ASTNode *create_operation_node(OperatorType op, ASTNode *left, ASTNode *right);
 ASTNode *create_unary_operation_node(OperatorType op, ASTNode *operand);
 ASTNode *create_for_statement_node(ASTNode *init, ASTNode *cond, ASTNode *incr, ASTNode *body);
-ASTNode *create_print_statement_node(ASTNode *expr);
+ASTNode *create_print_statement_node(ASTNode *expr, bool newline);
 ASTNode *create_error_statement_node(ASTNode *expr);
 ASTNode *create_statement_list(ASTNode *statement, ASTNode *next_statement);
 ASTNode *create_if_statement_node(ASTNode *condition, ASTNode *then_branch, ASTNode *else_branch);
